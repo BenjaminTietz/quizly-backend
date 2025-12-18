@@ -1,1 +1,80 @@
-*venv
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg-info/
+.eggs/
+
+# -------------------------
+# Virtual Environments
+# -------------------------
+venv/
+.env/
+.env.*
+.envrc
+
+# -------------------------
+# Django
+# -------------------------
+*.log
+db.sqlite3
+media/
+staticfiles/
+
+# Collected static files
+/static/
+
+# Migrations (optional)
+# **/migrations/*.py
+# !**/migrations/__init__.py
+
+# -------------------------
+# Django REST Framework
+# -------------------------
+*.sqlite3
+
+# -------------------------
+# Secrets
+# -------------------------
+*.env
+*.key
+*.pem
+
+# -------------------------
+# Node / Frontend (falls vorhanden)
+# -------------------------
+node_modules/
+dist/
+build/
+
+# -------------------------
+# OS / Editor
+# -------------------------
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# PyCharm
+.idea/
+
+# -------------------------
+# Test / Coverage
+# -------------------------
+.coverage
+htmlcov/
+pytest_cache/
+
+# -------------------------
+# Logs
+# -------------------------
+logs/
+*.log
