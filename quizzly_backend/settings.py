@@ -145,9 +145,6 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
 ]
 
-#TODO: Delete for production
-#CORS_ALLOW_CREDENTIALS = True
-
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:5500",
 ]
