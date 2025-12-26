@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'auth_app',
-    'quiz',
+    'quiz_app',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'django.contrib.admin',
