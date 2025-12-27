@@ -21,7 +21,7 @@ class Question(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.text
+        return self.question_title
     
 
 class QuestionOption(models.Model):
@@ -39,13 +39,10 @@ class QuizAttempt(models.Model):
     score = models.IntegerField(default=0)
     completed = models.BooleanField(default=False)
 
-    class Meta:
-        unique_together = ("user", "quiz")
-
     def __str__(self):
         return f"{self.user.username} → {self.quiz.title}: {self.score}"
     
-    
+
 class UserAnswer(models.Model):
     attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE, related_name="answers")
     question = models.ForeignKey(Question, on_delete=models.CASCADE)

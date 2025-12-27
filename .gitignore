@@ -29,8 +29,8 @@ staticfiles/
 /static/
 
 # Migrations (optional)
-# **/migrations/*.py
-# !**/migrations/__init__.py
+**/migrations/*.py
+!**/migrations/__init__.py
 
 # -------------------------
 # Django REST Framework
