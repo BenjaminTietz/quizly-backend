@@ -17,7 +17,7 @@ class QuizCreateView(APIView):
         if not url:
             return Response({"detail": "URL is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        quiz = create_quiz_from_url(user=request.user, url=url)
+        quiz = create_quiz_from_url(owner=request.user, url=url)
         serializer = QuizSerializer(quiz)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -26,7 +26,7 @@ class QuizListView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        quizzes = Quiz.objects.all()
+        quizzes = Quiz.objects.filter(owner=request.user)
         serializer = QuizSerializer(quizzes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -34,25 +34,46 @@ class QuizListView(APIView):
 class QuizDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, quiz_id):
+    def get_object(self, id, user):
         try:
-            quiz = Quiz.objects.get(id=quiz_id)
+            quiz = Quiz.objects.get(id=id)
         except Quiz.DoesNotExist:
-            return Response({"detail": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND)
+            return None, Response(
+                {"detail": "Quiz not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if quiz.owner != user:
+            return None, Response(
+                {"detail": "You do not have permission to access this quiz"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        return quiz, None
+
+    def get(self, request, id):
+        quiz, error_response = self.get_object(id, request.user)
+        if error_response:
+            return error_response
 
         serializer = QuizSerializer(quiz)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
 
-class QuizQuestionsView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    def patch(self, request, id):
+        quiz, error_response = self.get_object(id, request.user)
+        if error_response:
+            return error_response
 
-    def get(self, request, quiz_id):
-        try:
-            quiz = Quiz.objects.get(id=quiz_id)
-        except Quiz.DoesNotExist:
-            return Response({"detail": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = QuizSerializer(quiz, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        questions = quiz.questions.all()
-        serializer = QuestionSerializer(questions, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def delete(self, request, id):
+        quiz, error_response = self.get_object(id, request.user)
+        if error_response:
+            return error_response
+
+        quiz.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
