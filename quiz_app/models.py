@@ -2,25 +2,13 @@ from django.db import models
 from django.conf import settings
 
 
-class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-
-    def __str__(self):
-        return self.name
-
-
 class Quiz(models.Model):
-    DIFFICULTY_CHOICES = [
-        ("easy", "Easy"),
-        ("medium", "Medium"),
-        ("hard", "Hard"),
-    ]
-
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField()
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="quizzes")
-    difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES)
+    video_url = models.URLField()
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
@@ -28,33 +16,24 @@ class Quiz(models.Model):
 
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
-    text = models.CharField(max_length=500)
+    question_title = models.CharField(max_length=300)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.text
+    
 
-
-class Answer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="answers")
-    text = models.CharField(max_length=300)
+class QuestionOption(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="options")
+    option_text = models.CharField(max_length=200)
     is_correct = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.text} ({'correct' if self.is_correct else 'wrong'})"
+        return f"{self.option_text} ({'correct' if self.is_correct else 'wrong'})"
 
 
-class FavoriteQuiz(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ("user", "quiz")
-
-    def __str__(self):
-        return f"{self.user.username} → {self.quiz.title}"
-
-
-class UserProgress(models.Model):
+class QuizAttempt(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     score = models.IntegerField(default=0)
@@ -65,3 +44,12 @@ class UserProgress(models.Model):
 
     def __str__(self):
         return f"{self.user.username} → {self.quiz.title}: {self.score}"
+    
+    
+class UserAnswer(models.Model):
+    attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE, related_name="answers")
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    selected_option = models.ForeignKey(QuestionOption, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.attempt.user.username} - {self.question.question_title}: {self.selected_option.option_text}"
