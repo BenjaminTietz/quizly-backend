@@ -11,6 +11,12 @@ class Quiz(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        """
+        Returns the title of the quiz as a string.
+        
+        :return: The title of the quiz
+        :rtype: str
+        """
         return self.title
 
 
@@ -21,6 +27,12 @@ class Question(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        """
+        Returns the title of the question as a string.
+        
+        :return: The title of the question
+        :rtype: str
+        """
         return self.question_title
     
 
@@ -30,23 +42,12 @@ class QuestionOption(models.Model):
     is_correct = models.BooleanField(default=False)
 
     def __str__(self):
+        """
+        Returns a string representation of the question option.
+
+        The string representation includes the option text and its correctness.
+
+        :return: A string representation of the question option
+        :rtype: str
+        """
         return f"{self.option_text} ({'correct' if self.is_correct else 'wrong'})"
-
-
-class QuizAttempt(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    score = models.IntegerField(default=0)
-    completed = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.user.username} → {self.quiz.title}: {self.score}"
-    
-
-class UserAnswer(models.Model):
-    attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE, related_name="answers")
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    selected_option = models.ForeignKey(QuestionOption, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"{self.attempt.user.username} - {self.question.question_title}: {self.selected_option.option_text}"
